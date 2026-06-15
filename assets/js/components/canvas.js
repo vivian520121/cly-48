@@ -70,4 +70,12 @@ export function clearCanvas() {
   $('statusFile').style.display = 'none';
   canvas.style.width = '';
   canvas.style.height = '';
+  canvas.style.background = '';
+  canvas.style.backgroundImage = '';
+  canvas.style.backgroundSize = '';
+  canvas.style.backgroundPosition = '';
+  canvas.style.backgroundColor = '';
+  canvas.style.backgroundRepeat = '';
+  const wrapper = $('canvasWrapper');
+  if (wrapper) wrapper.style.background = '';
 }

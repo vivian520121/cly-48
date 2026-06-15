@@ -1,4 +1,5 @@
 import { state } from '../core/state.js';
+import { $ } from '../core/dom.js';
 
 export function createBackgroundStyle() {
   const { canvas, ctx } = state;
@@ -21,14 +22,41 @@ export function createBackgroundStyle() {
   return null;
 }
 
+function setCheckerboardBackground(canvas) {
+  canvas.style.backgroundImage = [
+    'linear-gradient(45deg, #e0e0e0 25%, transparent 25%)',
+    'linear-gradient(-45deg, #e0e0e0 25%, transparent 25%)',
+    'linear-gradient(45deg, transparent 75%, #e0e0e0 75%)',
+    'linear-gradient(-45deg, transparent 75%, #e0e0e0 75%)'
+  ].join(',');
+  canvas.style.backgroundSize = '20px 20px';
+  canvas.style.backgroundPosition = '0 0, 0 10px, 10px -10px, -10px 0px';
+  canvas.style.backgroundColor = '#ffffff';
+  canvas.style.backgroundRepeat = 'repeat';
+}
+
+function clearCheckerboardBackground(canvas) {
+  canvas.style.backgroundImage = '';
+  canvas.style.backgroundSize = '';
+  canvas.style.backgroundPosition = '';
+  canvas.style.backgroundColor = '';
+  canvas.style.backgroundRepeat = '';
+}
+
 export function renderWithBackground() {
   const { canvas, ctx } = state;
+  const wrapper = $('canvasWrapper');
   const bgStyle = createBackgroundStyle();
   if (!bgStyle) {
-    canvas.style.background = '';
+    clearCheckerboardBackground(canvas);
+    setCheckerboardBackground(canvas);
+    if (wrapper) wrapper.style.background = 'transparent';
     return;
   }
   
+  clearCheckerboardBackground(canvas);
+  if (wrapper) wrapper.style.background = '';
+
   if (typeof bgStyle === 'string') {
     canvas.style.background = bgStyle;
   } else {
