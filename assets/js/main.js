@@ -69,11 +69,16 @@ function handleCropApply(apply) {
 }
 
 function initGlobalEvents() {
-  $('applyCropBtn').addEventListener('click', () => handleCropApply(true));
-  $('cancelCropBtn').addEventListener('click', () => handleCropApply(false));
-  $('cropRect').addEventListener('mousedown', handleCropMouseDown);
-  $('canvasWrapper').addEventListener('mousedown', handleCanvasWrapperMouseDown);
-  state.canvas.addEventListener('click', handleCanvasClick);
+  const applyCropBtn = $('applyCropBtn');
+  const cancelCropBtn = $('cancelCropBtn');
+  const cropRect = $('cropRect');
+  const canvasWrapper = $('canvasWrapper');
+  
+  applyCropBtn?.addEventListener('click', () => handleCropApply(true));
+  cancelCropBtn?.addEventListener('click', () => handleCropApply(false));
+  cropRect?.addEventListener('mousedown', handleCropMouseDown);
+  canvasWrapper?.addEventListener('mousedown', handleCanvasWrapperMouseDown);
+  state.canvas?.addEventListener('click', handleCanvasClick);
 
   document.addEventListener('mousemove', handleCropMouseMove);
   document.addEventListener('mouseup', handleCropMouseUp);
@@ -109,4 +114,8 @@ function initApp() {
   initGlobalEvents();
 }
 
-initApp();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}

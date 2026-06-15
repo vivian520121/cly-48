@@ -12,8 +12,11 @@ export function handleFile(file) {
     return;
   }
 
-  $('statusFile').textContent = `文件: ${file.name}`;
-  $('statusFile').style.display = 'flex';
+  const statusFile = $('statusFile');
+  if (statusFile) {
+    statusFile.textContent = `文件: ${file.name}`;
+    statusFile.style.display = 'flex';
+  }
 
   const reader = new FileReader();
   reader.onload = e => {
@@ -21,11 +24,12 @@ export function handleFile(file) {
     img.onload = () => {
       resetHistory();
       loadImageToCanvas(img);
-      saveHistory();
       const { canvas, ctx } = state;
       state.originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       updateImageButtons(true);
-      $('dropZone').classList.add('hidden');
+      saveHistory();
+      const dropZone = $('dropZone');
+      if (dropZone) dropZone.classList.add('hidden');
       updateStatusSize();
       fitZoom();
       renderWithBackground();
@@ -34,5 +38,6 @@ export function handleFile(file) {
     img.onerror = () => showToast('图片加载失败', 'error');
     img.src = e.target.result;
   };
+  reader.onerror = () => showToast('文件读取失败', 'error');
   reader.readAsDataURL(file);
 }
