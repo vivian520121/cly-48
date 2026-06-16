@@ -6,6 +6,18 @@ import { renderWithBackground } from '../components/background.js';
 import { showToast } from './toast.js';
 import { getColorAtPosition } from '../components/canvas.js';
 
+let bgSaveDebounceTimer = null;
+function debounceSaveBgHistory() {
+  if (!state.imageLoaded) return;
+  if (bgSaveDebounceTimer) {
+    clearTimeout(bgSaveDebounceTimer);
+  }
+  bgSaveDebounceTimer = setTimeout(() => {
+    saveHistory();
+    bgSaveDebounceTimer = null;
+  }, 300);
+}
+
 export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onClear, onCrop, onExport }) {
   document.querySelectorAll('.sidebar-section').forEach(section => {
     const collapseBtn = section.querySelector('.collapse-btn');
@@ -57,6 +69,7 @@ export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onC
       $('solidBgGroup').style.display = type === 'solid' ? 'block' : 'none';
       $('gradientBgGroup').style.display = type === 'gradient' ? 'block' : 'none';
       renderWithBackground();
+      saveHistory();
       onBgTypeChange?.(type);
     });
   });
@@ -65,12 +78,14 @@ export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onC
     state.bgColor = e.target.value;
     $('bgColorHex').value = e.target.value;
     renderWithBackground();
+    debounceSaveBgHistory();
   });
   $('bgColorHex').addEventListener('input', e => {
     if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) {
       state.bgColor = e.target.value;
       $('bgColor').value = e.target.value;
       renderWithBackground();
+      debounceSaveBgHistory();
     }
   });
 
@@ -83,6 +98,7 @@ export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onC
       $('bgColor').value = color;
       $('bgColorHex').value = color;
       renderWithBackground();
+      saveHistory();
     });
   });
 
@@ -90,30 +106,35 @@ export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onC
     state.gradientStart = e.target.value;
     $('gradientStartHex').value = e.target.value;
     renderWithBackground();
+    debounceSaveBgHistory();
   });
   $('gradientStartHex').addEventListener('input', e => {
     if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) {
       state.gradientStart = e.target.value;
       $('gradientStart').value = e.target.value;
       renderWithBackground();
+      debounceSaveBgHistory();
     }
   });
   $('gradientEnd').addEventListener('input', e => {
     state.gradientEnd = e.target.value;
     $('gradientEndHex').value = e.target.value;
     renderWithBackground();
+    debounceSaveBgHistory();
   });
   $('gradientEndHex').addEventListener('input', e => {
     if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) {
       state.gradientEnd = e.target.value;
       $('gradientEnd').value = e.target.value;
       renderWithBackground();
+      debounceSaveBgHistory();
     }
   });
   $('gradientAngle').addEventListener('input', e => {
     state.gradientAngle = parseInt(e.target.value);
     $('gradientAngleInput').value = e.target.value;
     renderWithBackground();
+    debounceSaveBgHistory();
   });
   $('gradientAngleInput').addEventListener('input', e => {
     let value = parseInt(e.target.value) || 0;
@@ -122,6 +143,7 @@ export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onC
     state.gradientAngle = value;
     $('gradientAngle').value = value;
     renderWithBackground();
+    debounceSaveBgHistory();
   });
 
   $('clearBtn').addEventListener('click', () => onClear?.());

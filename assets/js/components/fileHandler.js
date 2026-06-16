@@ -65,7 +65,12 @@ async function processFile(file) {
     const initialHistoryEntry = {
       width: w,
       height: h,
-      imageData: new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height)
+      imageData: new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height),
+      bgType: state.bgType,
+      bgColor: state.bgColor,
+      gradientStart: state.gradientStart,
+      gradientEnd: state.gradientEnd,
+      gradientAngle: state.gradientAngle
     };
     
     return {
@@ -140,7 +145,12 @@ export function switchToImage(index) {
     images[state.currentImageIndex].history = state.history.map(entry => ({
       width: entry.width,
       height: entry.height,
-      imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height)
+      imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height),
+      bgType: entry.bgType,
+      bgColor: entry.bgColor,
+      gradientStart: entry.gradientStart,
+      gradientEnd: entry.gradientEnd,
+      gradientAngle: entry.gradientAngle
     }));
     images[state.currentImageIndex].historyIndex = state.historyIndex;
     
@@ -173,9 +183,23 @@ export function switchToImage(index) {
   state.history = targetImg.history.map(entry => ({
     width: entry.width,
     height: entry.height,
-    imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height)
+    imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height),
+    bgType: entry.bgType,
+    bgColor: entry.bgColor,
+    gradientStart: entry.gradientStart,
+    gradientEnd: entry.gradientEnd,
+    gradientAngle: entry.gradientAngle
   }));
   state.historyIndex = targetImg.historyIndex;
+  
+  const latestEntry = state.history[state.historyIndex];
+  if (latestEntry && latestEntry.bgType !== undefined) {
+    state.bgType = latestEntry.bgType;
+    state.bgColor = latestEntry.bgColor;
+    state.gradientStart = latestEntry.gradientStart;
+    state.gradientEnd = latestEntry.gradientEnd;
+    state.gradientAngle = latestEntry.gradientAngle;
+  }
   
   updateImageButtons(true);
   updateHistoryButtons();

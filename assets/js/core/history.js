@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { $ } from './dom.js';
+import { renderWithBackground } from '../components/background.js';
 
 export function saveHistory() {
   if (!state.imageLoaded) return;
@@ -9,7 +10,12 @@ export function saveHistory() {
   const historyEntry = {
     width: canvas.width,
     height: canvas.height,
-    imageData: new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height)
+    imageData: new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height),
+    bgType: state.bgType,
+    bgColor: state.bgColor,
+    gradientStart: state.gradientStart,
+    gradientEnd: state.gradientEnd,
+    gradientAngle: state.gradientAngle
   };
   state.history.push(historyEntry);
   state.historyIndex = state.history.length - 1;
@@ -19,7 +25,12 @@ export function saveHistory() {
     currentImg.history = state.history.map(entry => ({
       width: entry.width,
       height: entry.height,
-      imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height)
+      imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height),
+      bgType: entry.bgType,
+      bgColor: entry.bgColor,
+      gradientStart: entry.gradientStart,
+      gradientEnd: entry.gradientEnd,
+      gradientAngle: entry.gradientAngle
     }));
     currentImg.historyIndex = state.historyIndex;
     currentImg.imageData = new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height);
@@ -48,7 +59,12 @@ function syncHistoryToCurrentImage() {
     currentImg.history = state.history.map(entry => ({
       width: entry.width,
       height: entry.height,
-      imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height)
+      imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height),
+      bgType: entry.bgType,
+      bgColor: entry.bgColor,
+      gradientStart: entry.gradientStart,
+      gradientEnd: entry.gradientEnd,
+      gradientAngle: entry.gradientAngle
     }));
     currentImg.historyIndex = state.historyIndex;
     const { canvas, ctx } = state;
@@ -66,6 +82,16 @@ export function restoreFromHistory() {
   state.width = entry.width;
   state.height = entry.height;
   ctx.putImageData(entry.imageData, 0, 0);
+  
+  if (entry.bgType !== undefined) {
+    state.bgType = entry.bgType;
+    state.bgColor = entry.bgColor;
+    state.gradientStart = entry.gradientStart;
+    state.gradientEnd = entry.gradientEnd;
+    state.gradientAngle = entry.gradientAngle;
+    renderWithBackground();
+  }
+  
   updateHistoryButtons();
 }
 
