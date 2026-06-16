@@ -7,11 +7,37 @@ import { showToast } from './toast.js';
 import { getColorAtPosition } from '../components/canvas.js';
 
 export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onClear, onCrop, onExport }) {
-  $('toleranceRange').addEventListener('input', e => {
-    $('toleranceValue').textContent = e.target.value;
+  document.querySelectorAll('.sidebar-section').forEach(section => {
+    const collapseBtn = section.querySelector('.collapse-btn');
+    const title = section.querySelector('.section-title');
+    
+    collapseBtn.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+    });
+    
+    title.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+    });
   });
+
+  $('toleranceRange').addEventListener('input', e => {
+    $('toleranceInput').value = e.target.value;
+  });
+  $('toleranceInput').addEventListener('input', e => {
+    let value = parseInt(e.target.value) || 0;
+    value = Math.max(0, Math.min(100, value));
+    e.target.value = value;
+    $('toleranceRange').value = value;
+  });
+
   $('featherRange').addEventListener('input', e => {
-    $('featherValue').textContent = e.target.value;
+    $('featherInput').value = e.target.value;
+  });
+  $('featherInput').addEventListener('input', e => {
+    let value = parseInt(e.target.value) || 0;
+    value = Math.max(0, Math.min(20, value));
+    e.target.value = value;
+    $('featherRange').value = value;
   });
 
   $('removeBgBtn').addEventListener('click', () => {
@@ -86,7 +112,15 @@ export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onC
   });
   $('gradientAngle').addEventListener('input', e => {
     state.gradientAngle = parseInt(e.target.value);
-    $('gradientAngleValue').textContent = e.target.value + '°';
+    $('gradientAngleInput').value = e.target.value;
+    renderWithBackground();
+  });
+  $('gradientAngleInput').addEventListener('input', e => {
+    let value = parseInt(e.target.value) || 0;
+    value = Math.max(0, Math.min(360, value));
+    e.target.value = value;
+    state.gradientAngle = value;
+    $('gradientAngle').value = value;
     renderWithBackground();
   });
 
