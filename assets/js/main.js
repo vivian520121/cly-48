@@ -1,12 +1,12 @@
 import { $ } from './core/dom.js';
-import { state } from './core/state.js';
+import { state, setState } from './core/state.js';
 import { saveHistory, undo, redo, restoreFromHistory, resetHistory, updateHistoryButtons } from './core/history.js';
 import { initCanvas, updateImageButtons, updateStatusSize, getColorAtPosition, clearCanvas as clearCanvasFn } from './components/canvas.js';
 import { renderWithBackground } from './components/background.js';
 import { floodFillRemoveBg } from './components/removeBg.js';
 import { setZoom, fitZoom } from './components/zoom.js';
 import { startCropMode, endCropMode, updateCropOverlay, handleCropMouseDown, handleCanvasWrapperMouseDown, handleCropMouseMove, handleCropMouseUp } from './components/crop.js';
-import { handleFile } from './components/fileHandler.js';
+import { handleFiles, renderThumbnails } from './components/fileHandler.js';
 import { exportPNG } from './components/exporter.js';
 import { showToast } from './ui/toast.js';
 import { initSidebarEvents } from './ui/sidebar.js';
@@ -58,6 +58,8 @@ function handleClear() {
   clearCanvasFn();
   resetHistory();
   updateImageButtons(false);
+  setState({ images: [], currentImageIndex: -1 });
+  renderThumbnails();
   showToast('画布已清除');
 }
 
@@ -98,7 +100,12 @@ function initApp() {
   initCanvas();
   updateHistoryButtons();
 
-  initDropzoneEvents({ onFile: handleFile });
+  initDropzoneEvents({ 
+    onFiles: async (files) => {
+      await handleFiles(files);
+      renderThumbnails();
+    }
+  });
   initToolbarEvents({
     onUndo: () => { undo(); restoreFromHistory(); renderWithBackground(); },
     onRedo: () => { redo(); restoreFromHistory(); renderWithBackground(); }

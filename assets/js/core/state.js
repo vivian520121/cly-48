@@ -15,7 +15,9 @@ export const state = {
   gradientStart: '#667eea',
   gradientEnd: '#764ba2',
   gradientAngle: 135,
-  originalImageData: null
+  originalImageData: null,
+  images: [],
+  currentImageIndex: -1
 };
 
 export const setState = (partial) => {

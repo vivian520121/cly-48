@@ -20,7 +20,7 @@
     
     <div class="sidebar-section" data-section="upload">
       <div class="section-header">
-        <div class="section-title" data-tooltip="上传图片文件到画布，支持PNG、JPG、WebP格式">图片上传</div>
+        <div class="section-title" data-tooltip="上传图片文件到画布，支持PNG、JPG、WebP、SVG格式">图片上传</div>
         <button class="collapse-btn" aria-label="折叠/展开">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 12 15 18 9"/>
@@ -277,8 +277,12 @@
         <div class="drop-text">
           <strong>点击选择</strong> 或将图片拖拽到此处
         </div>
-        <div class="drop-hint">支持 PNG、JPG、WebP 格式</div>
+        <div class="drop-hint">支持 PNG、JPG、WebP、SVG 格式，可批量上传</div>
       </div>
+    </div>
+    
+    <div class="thumbnail-bar" id="thumbnailBar" style="display: none;">
+      <div class="thumbnail-track" id="thumbnailTrack"></div>
     </div>
     
     <div class="status-bar">
@@ -298,7 +302,7 @@
 
 <div class="toast" id="toast"></div>
 
-<input type="file" id="fileInput" accept="image/*" style="display: none;">
+<input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
 
 <script type="module" src="assets/js/main.js"></script>
 </body>
