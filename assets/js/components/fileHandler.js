@@ -1,7 +1,7 @@
 import { state, setState } from '../core/state.js';
 import { $ } from '../core/dom.js';
 import { updateImageButtons, updateStatusSize } from './canvas.js';
-import { saveHistory, resetHistory } from '../core/history.js';
+import { resetHistory, updateHistoryButtons } from '../core/history.js';
 import { fitZoom } from './zoom.js';
 import { renderWithBackground } from './background.js';
 import { showToast } from '../ui/toast.js';
@@ -62,6 +62,12 @@ async function processFile(file) {
     thumbCtx.drawImage(img, 0, 0, thumbW, thumbH);
     const thumbnail = thumbCanvas.toDataURL('image/png');
     
+    const initialHistoryEntry = {
+      width: w,
+      height: h,
+      imageData: new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height)
+    };
+    
     return {
       id,
       name: file.name,
@@ -70,7 +76,10 @@ async function processFile(file) {
       height: h,
       imageData,
       thumbnail,
-      dataUrl
+      dataUrl,
+      originalImageData: new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height),
+      history: [initialHistoryEntry],
+      historyIndex: 0
     };
   } catch (e) {
     console.error('Error processing file:', e);
@@ -125,6 +134,15 @@ export function switchToImage(index) {
     const { canvas, ctx } = state;
     const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     images[state.currentImageIndex].imageData = currentImageData;
+    images[state.currentImageIndex].originalImageData = state.originalImageData 
+      ? new ImageData(new Uint8ClampedArray(state.originalImageData.data), state.originalImageData.width, state.originalImageData.height)
+      : null;
+    images[state.currentImageIndex].history = state.history.map(entry => ({
+      width: entry.width,
+      height: entry.height,
+      imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height)
+    }));
+    images[state.currentImageIndex].historyIndex = state.historyIndex;
     
     const thumbCanvas = document.createElement('canvas');
     const thumbCtx = thumbCanvas.getContext('2d');
@@ -138,28 +156,36 @@ export function switchToImage(index) {
     images[state.currentImageIndex].thumbnail = thumbCanvas.toDataURL('image/png');
   }
   
-  const imageData = images[index].imageData;
+  const targetImg = images[index];
   setState({ currentImageIndex: index });
   
   const { canvas, ctx } = state;
-  canvas.width = imageData.width;
-  canvas.height = imageData.height;
-  state.width = imageData.width;
-  state.height = imageData.height;
-  ctx.clearRect(0, 0, imageData.width, imageData.height);
-  ctx.putImageData(imageData, 0, 0);
+  canvas.width = targetImg.width;
+  canvas.height = targetImg.height;
+  state.width = targetImg.width;
+  state.height = targetImg.height;
+  ctx.clearRect(0, 0, targetImg.width, targetImg.height);
+  ctx.putImageData(targetImg.imageData, 0, 0);
   
-  resetHistory();
-  state.originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  state.originalImageData = targetImg.originalImageData 
+    ? new ImageData(new Uint8ClampedArray(targetImg.originalImageData.data), targetImg.originalImageData.width, targetImg.originalImageData.height)
+    : null;
+  state.history = targetImg.history.map(entry => ({
+    width: entry.width,
+    height: entry.height,
+    imageData: new ImageData(new Uint8ClampedArray(entry.imageData.data), entry.imageData.width, entry.imageData.height)
+  }));
+  state.historyIndex = targetImg.historyIndex;
+  
   updateImageButtons(true);
-  saveHistory();
+  updateHistoryButtons();
   
   const dropZone = $('dropZone');
   if (dropZone) dropZone.classList.add('hidden');
   
   const statusFile = $('statusFile');
   if (statusFile) {
-    statusFile.textContent = `文件: ${images[index].name}`;
+    statusFile.textContent = `文件: ${targetImg.name}`;
     statusFile.style.display = 'flex';
   }
   
