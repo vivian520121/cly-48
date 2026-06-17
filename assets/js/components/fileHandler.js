@@ -233,6 +233,61 @@ export function updateThumbnailActive() {
   });
 }
 
+export function toggleImageSelection(index) {
+  const idx = state.selectedImages.indexOf(index);
+  if (idx === -1) {
+    state.selectedImages.push(index);
+  } else {
+    state.selectedImages.splice(idx, 1);
+  }
+  updateThumbnailSelection();
+  updateBatchButtons();
+}
+
+export function selectAllImages() {
+  state.selectedImages = state.images.map((_, i) => i);
+  updateThumbnailSelection();
+  updateBatchButtons();
+}
+
+export function deselectAllImages() {
+  state.selectedImages = [];
+  updateThumbnailSelection();
+  updateBatchButtons();
+}
+
+function updateThumbnailSelection() {
+  const track = $('thumbnailTrack');
+  if (!track) return;
+  
+  const thumbs = track.querySelectorAll('.thumbnail-item');
+  thumbs.forEach((thumb, i) => {
+    const checkbox = thumb.querySelector('.thumbnail-checkbox');
+    if (state.selectedImages.includes(i)) {
+      thumb.classList.add('selected');
+      if (checkbox) checkbox.checked = true;
+    } else {
+      thumb.classList.remove('selected');
+      if (checkbox) checkbox.checked = false;
+    }
+  });
+}
+
+function updateBatchButtons() {
+  const hasSelection = state.selectedImages.length > 0;
+  const batchRemoveBgBtn = $('batchRemoveBgBtn');
+  const batchBgApplyBtn = $('batchBgApplyBtn');
+  const batchParamsApplyBtn = $('batchParamsApplyBtn');
+  const selectAllBtn = $('selectAllBtn');
+  const deselectAllBtn = $('deselectAllBtn');
+  
+  if (batchRemoveBgBtn) batchRemoveBgBtn.disabled = !hasSelection;
+  if (batchBgApplyBtn) batchBgApplyBtn.disabled = !hasSelection;
+  if (batchParamsApplyBtn) batchParamsApplyBtn.disabled = !hasSelection;
+  if (selectAllBtn) selectAllBtn.disabled = state.images.length === 0;
+  if (deselectAllBtn) deselectAllBtn.disabled = !hasSelection;
+}
+
 export function renderThumbnails() {
   const bar = $('thumbnailBar');
   const track = $('thumbnailTrack');
@@ -240,16 +295,30 @@ export function renderThumbnails() {
   
   if (state.images.length === 0) {
     bar.style.display = 'none';
+    state.selectedImages = [];
+    updateBatchButtons();
     return;
   }
   
   bar.style.display = 'flex';
   track.innerHTML = '';
   
+  state.selectedImages = state.selectedImages.filter(i => i < state.images.length);
+  
   state.images.forEach((img, index) => {
     const item = document.createElement('div');
-    item.className = 'thumbnail-item' + (index === state.currentImageIndex ? ' active' : '');
+    item.className = 'thumbnail-item' + (index === state.currentImageIndex ? ' active' : '') + (state.selectedImages.includes(index) ? ' selected' : '');
     item.dataset.index = index;
+    
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'thumbnail-checkbox';
+    checkbox.checked = state.selectedImages.includes(index);
+    checkbox.title = '选中图片';
+    checkbox.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleImageSelection(index);
+    });
     
     const thumb = document.createElement('img');
     thumb.src = img.thumbnail;
@@ -270,6 +339,7 @@ export function renderThumbnails() {
       removeImage(index);
     });
     
+    item.appendChild(checkbox);
     item.appendChild(thumb);
     item.appendChild(label);
     item.appendChild(removeBtn);
@@ -278,6 +348,8 @@ export function renderThumbnails() {
     
     track.appendChild(item);
   });
+  
+  updateBatchButtons();
 }
 
 export function removeImage(index) {
@@ -285,6 +357,10 @@ export function removeImage(index) {
   if (index < 0 || index >= images.length) return;
   
   images.splice(index, 1);
+  
+  state.selectedImages = state.selectedImages
+    .filter(i => i !== index)
+    .map(i => i > index ? i - 1 : i);
   
   if (images.length === 0) {
     setState({ images: [], currentImageIndex: -1 });

@@ -6,7 +6,8 @@ import { renderWithBackground } from './components/background.js';
 import { floodFillRemoveBg } from './components/removeBg.js';
 import { setZoom, fitZoom } from './components/zoom.js';
 import { startCropMode, endCropMode, updateCropOverlay, handleCropMouseDown, handleCanvasWrapperMouseDown, handleCropMouseMove, handleCropMouseUp } from './components/crop.js';
-import { handleFiles, renderThumbnails } from './components/fileHandler.js';
+import { handleFiles, renderThumbnails, selectAllImages, deselectAllImages } from './components/fileHandler.js';
+import { batchRemoveBg, batchApplyBackground, batchApplyParams } from './components/batchOperations.js';
 import { exportPNG } from './components/exporter.js';
 import { showToast } from './ui/toast.js';
 import { initSidebarEvents } from './ui/sidebar.js';
@@ -115,7 +116,27 @@ function initApp() {
     onPickColor: handlePickColor,
     onClear: handleClear,
     onCrop: startCropMode,
-    onExport: exportPNG
+    onExport: exportPNG,
+    onBatchRemoveBg: () => {
+      batchRemoveBg();
+      updateHistoryButtons();
+    },
+    onBatchBgApply: () => {
+      batchApplyBackground();
+      updateHistoryButtons();
+    },
+    onBatchParamsApply: () => {
+      const tolerance = parseInt($('toleranceRange').value);
+      const feather = parseInt($('featherRange').value);
+      batchApplyParams(tolerance, feather);
+      updateHistoryButtons();
+    },
+    onSelectAll: () => {
+      selectAllImages();
+    },
+    onDeselectAll: () => {
+      deselectAllImages();
+    }
   });
 
   initGlobalEvents();

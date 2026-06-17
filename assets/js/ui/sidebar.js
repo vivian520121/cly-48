@@ -18,7 +18,7 @@ function debounceSaveBgHistory() {
   }, 300);
 }
 
-export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onClear, onCrop, onExport }) {
+export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onClear, onCrop, onExport, onBatchRemoveBg, onBatchBgApply, onBatchParamsApply, onSelectAll, onDeselectAll }) {
   document.querySelectorAll('.sidebar-section').forEach(section => {
     const collapseBtn = section.querySelector('.collapse-btn');
     const title = section.querySelector('.section-title');
@@ -149,4 +149,16 @@ export function initSidebarEvents({ onRemoveBg, onPickColor, onBgTypeChange, onC
   $('clearBtn').addEventListener('click', () => onClear?.());
   $('cropBtn').addEventListener('click', () => onCrop?.());
   $('exportBtn').addEventListener('click', () => onExport?.());
+  
+  const selectAllBtn = $('selectAllBtn');
+  const deselectAllBtn = $('deselectAllBtn');
+  const batchRemoveBgBtn = $('batchRemoveBgBtn');
+  const batchBgApplyBtn = $('batchBgApplyBtn');
+  const batchParamsApplyBtn = $('batchParamsApplyBtn');
+  
+  if (selectAllBtn) selectAllBtn.addEventListener('click', () => onSelectAll?.());
+  if (deselectAllBtn) deselectAllBtn.addEventListener('click', () => onDeselectAll?.());
+  if (batchRemoveBgBtn) batchRemoveBgBtn.addEventListener('click', () => onBatchRemoveBg?.());
+  if (batchBgApplyBtn) batchBgApplyBtn.addEventListener('click', () => onBatchBgApply?.());
+  if (batchParamsApplyBtn) batchParamsApplyBtn.addEventListener('click', () => onBatchParamsApply?.());
 }
